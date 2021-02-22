@@ -1,4 +1,5 @@
 #include "DetectorConstruction.hh"
+#include "SensitiveDetector.hh"
 
 #include "G4SystemOfUnits.hh"
 #include "G4NistManager.hh"
@@ -8,8 +9,6 @@
 #include "G4PVPlacement.hh"
 #include "G4VisAttributes.hh"
 #include "G4SDManager.hh"
-#include "G4MultiFunctionalDetector.hh"
-#include "G4PSEnergyDeposit.hh"
 
 DetectorConstruction::DetectorConstruction()
     : G4VUserDetectorConstruction()
@@ -66,15 +65,15 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
     auto pvWorld = new G4PVPlacement(0, G4ThreeVector(), lvWorld, "World", nullptr, false, 0);
 
     // HPGe main detector
-    auto mainDetHeight = 12. * cm;
-    auto mainDetDiam = 7.8 * cm;
+    auto mainDetHeight = 13.5 * cm;
+    auto mainDetDiam = 7.62 * cm;
     auto solMainDet = new G4Tubs("MainDet", 0., .5 * mainDetDiam, .5 * mainDetHeight, 0., 360. * deg);
     auto lvMainDet = new G4LogicalVolume(solMainDet, matGe, "MainDet");
     lvMainDet->SetVisAttributes(visBlueSol);
     auto pvMainDet = new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), lvMainDet, "MainDet", lvWorld, false, 0);
     // HPGe main detector cooler line
     auto mainDetCoolerLineHeight = 5. * cm;
-    auto mainDetCoolerLineDiam = 1.5 * cm;
+    auto mainDetCoolerLineDiam = 2.54 * cm;
     auto solMainDetCoolerLine = new G4Tubs("MainDetCoolerLine", 0., .5 * mainDetCoolerLineDiam, .5 * mainDetCoolerLineHeight, 0., 360. * deg);
     auto lvMainDetCoolerLine = new G4LogicalVolume(solMainDetCoolerLine, matAl, "MainDetCoolerLine");
     lvMainDetCoolerLine->SetVisAttributes(visCyanSol);
@@ -128,9 +127,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct()
 
 void DetectorConstruction::ConstructSDandField()
 {
-    auto mfdDetector = new G4MultiFunctionalDetector("Detector");
-    G4SDManager::GetSDMpointer()->AddNewDetector(mfdDetector);
-    auto psEDep = new G4PSEnergyDeposit("EDep");
-    mfdDetector->RegisterPrimitive(psEDep);
-    SetSensitiveDetector("MainDet", mfdDetector);
+    auto sd = new SensitiveDetector("Detector");
+    G4SDManager::GetSDMpointer()->AddNewDetector(sd);
+    SetSensitiveDetector("MainDet", sd);
 }
